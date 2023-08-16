@@ -12,8 +12,8 @@ namespace lve {
     static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
             VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
             VkDebugUtilsMessageTypeFlagsEXT messageType,
-            const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
-            void *pUserData) {
+            const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+            void* pUserData) {
         std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
 
         return VK_FALSE;
@@ -21,10 +21,10 @@ namespace lve {
 
     VkResult CreateDebugUtilsMessengerEXT(
             VkInstance instance,
-            const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
-            const VkAllocationCallbacks *pAllocator,
-            VkDebugUtilsMessengerEXT *pDebugMessenger) {
-        auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
+            const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
+            const VkAllocationCallbacks* pAllocator,
+            VkDebugUtilsMessengerEXT* pDebugMessenger) {
+        auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(
                 instance,
                 "vkCreateDebugUtilsMessengerEXT");
         if (func != nullptr) {
@@ -37,8 +37,8 @@ namespace lve {
     void DestroyDebugUtilsMessengerEXT(
             VkInstance instance,
             VkDebugUtilsMessengerEXT debugMessenger,
-            const VkAllocationCallbacks *pAllocator) {
-        auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
+            const VkAllocationCallbacks* pAllocator) {
+        auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(
                 instance,
                 "vkDestroyDebugUtilsMessengerEXT");
         if (func != nullptr) {
@@ -47,7 +47,7 @@ namespace lve {
     }
 
 // class member functions
-    LveDevice::LveDevice(LveWindow &window) : window{window} {
+    LveDevice::LveDevice(LveWindow& window) : window{window} {
         createInstance();
         setupDebugMessenger();
         createSurface();
@@ -95,7 +95,7 @@ namespace lve {
             createInfo.ppEnabledLayerNames = validationLayers.data();
 
             populateDebugMessengerCreateInfo(debugCreateInfo);
-            createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&debugCreateInfo;
+            createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*) &debugCreateInfo;
         } else {
             createInfo.enabledLayerCount = 0;
             createInfo.pNext = nullptr;
@@ -118,7 +118,7 @@ namespace lve {
         std::vector<VkPhysicalDevice> devices(deviceCount);
         vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
 
-        for (const auto &device : devices) {
+        for (const auto& device: devices) {
             if (isDeviceSuitable(device)) {
                 physicalDevice = device;
                 break;
@@ -140,7 +140,7 @@ namespace lve {
         std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily, indices.presentFamily};
 
         float queuePriority = 1.0f;
-        for (uint32_t queueFamily : uniqueQueueFamilies) {
+        for (uint32_t queueFamily: uniqueQueueFamilies) {
             VkDeviceQueueCreateInfo queueCreateInfo = {};
             queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
             queueCreateInfo.queueFamilyIndex = queueFamily;
@@ -214,7 +214,7 @@ namespace lve {
     }
 
     void LveDevice::populateDebugMessengerCreateInfo(
-            VkDebugUtilsMessengerCreateInfoEXT &createInfo) {
+            VkDebugUtilsMessengerCreateInfoEXT& createInfo) {
         createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
         createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
@@ -242,10 +242,10 @@ namespace lve {
         std::vector<VkLayerProperties> availableLayers(layerCount);
         vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
 
-        for (const char *layerName : validationLayers) {
+        for (const char* layerName: validationLayers) {
             bool layerFound = false;
 
-            for (const auto &layerProperties : availableLayers) {
+            for (const auto& layerProperties: availableLayers) {
                 if (strcmp(layerName, layerProperties.layerName) == 0) {
                     layerFound = true;
                     break;
@@ -260,12 +260,12 @@ namespace lve {
         return true;
     }
 
-    std::vector<const char *> LveDevice::getRequiredExtensions() {
+    std::vector<const char*> LveDevice::getRequiredExtensions() {
         uint32_t glfwExtensionCount = 0;
-        const char **glfwExtensions;
+        const char** glfwExtensions;
         glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
-        std::vector<const char *> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+        std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
         if (enableValidationLayers) {
             extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
@@ -282,14 +282,14 @@ namespace lve {
 
         std::cout << "available extensions:" << std::endl;
         std::unordered_set<std::string> available;
-        for (const auto &extension : extensions) {
+        for (const auto& extension: extensions) {
             std::cout << "\t" << extension.extensionName << std::endl;
             available.insert(extension.extensionName);
         }
 
         std::cout << "required extensions:" << std::endl;
         auto requiredExtensions = getRequiredExtensions();
-        for (const auto &required : requiredExtensions) {
+        for (const auto& required: requiredExtensions) {
             std::cout << "\t" << required << std::endl;
             if (available.find(required) == available.end()) {
                 throw std::runtime_error("Missing required glfw extension");
@@ -310,7 +310,7 @@ namespace lve {
 
         std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
 
-        for (const auto &extension : availableExtensions) {
+        for (const auto& extension: availableExtensions) {
             requiredExtensions.erase(extension.extensionName);
         }
 
@@ -327,7 +327,7 @@ namespace lve {
         vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
 
         int i = 0;
-        for (const auto &queueFamily : queueFamilies) {
+        for (const auto& queueFamily: queueFamilies) {
             if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
                 indices.graphicsFamily = i;
                 indices.graphicsFamilyHasValue = true;
@@ -375,8 +375,8 @@ namespace lve {
     }
 
     VkFormat LveDevice::findSupportedFormat(
-            const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features) {
-        for (VkFormat format : candidates) {
+            const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) {
+        for (VkFormat format: candidates) {
             VkFormatProperties props;
             vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);
 
@@ -407,8 +407,8 @@ namespace lve {
             VkDeviceSize size,
             VkBufferUsageFlags usage,
             VkMemoryPropertyFlags properties,
-            VkBuffer &buffer,
-            VkDeviceMemory &bufferMemory) {
+            VkBuffer& buffer,
+            VkDeviceMemory& bufferMemory) {
         VkBufferCreateInfo bufferInfo{};
         bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         bufferInfo.size = size;
@@ -506,10 +506,10 @@ namespace lve {
     }
 
     void LveDevice::createImageWithInfo(
-            const VkImageCreateInfo &imageInfo,
+            const VkImageCreateInfo& imageInfo,
             VkMemoryPropertyFlags properties,
-            VkImage &image,
-            VkDeviceMemory &imageMemory) {
+            VkImage& image,
+            VkDeviceMemory& imageMemory) {
         if (vkCreateImage(device_, &imageInfo, nullptr, &image) != VK_SUCCESS) {
             throw std::runtime_error("failed to create image!");
         }

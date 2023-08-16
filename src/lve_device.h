@@ -2,7 +2,6 @@
 
 #include "lve_window.h"
 
-// std lib headers
 #include <string>
 #include <vector>
 
@@ -20,7 +19,8 @@ namespace lve {
         bool graphicsFamilyHasValue = false;
         bool presentFamilyHasValue = false;
 
-        bool isComplete() { return graphicsFamilyHasValue && presentFamilyHasValue; }
+        [[nodiscard]]
+        bool isComplete() const { return graphicsFamilyHasValue && presentFamilyHasValue; }
     };
 
     class LveDevice {
@@ -31,7 +31,7 @@ namespace lve {
         const bool enableValidationLayers = true;
 #endif
 
-        LveDevice(LveWindow& window);
+        explicit LveDevice(LveWindow& window);
 
         ~LveDevice();
 
