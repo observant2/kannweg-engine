@@ -16,7 +16,9 @@ add_executable(v_engine
         src/lve_pipeline.cpp
         src/lve_pipeline.h
         src/lve_device.cpp
-        src/lve_device.h)
+        src/lve_device.h
+        src/lve_swapchain.cpp
+        src/lve_swapchain.h)
 
 target_link_libraries(v_engine PRIVATE glfw Vulkan::Vulkan fmt::fmt)
 

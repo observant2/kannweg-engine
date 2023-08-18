@@ -7,7 +7,7 @@
 
 namespace lve {
 
-    struct SwapChainSupportDetails {
+    struct SwapchainSupportDetails {
         VkSurfaceCapabilitiesKHR capabilities;
         std::vector<VkSurfaceFormatKHR> formats;
         std::vector<VkPresentModeKHR> presentModes;
@@ -54,7 +54,7 @@ namespace lve {
 
         VkQueue presentQueue() { return presentQueue_; }
 
-        SwapChainSupportDetails getSwapChainSupport() { return querySwapChainSupport(physicalDevice); }
+        SwapchainSupportDetails getSwapchainSupport() { return querySwapchainSupport(physicalDevice); }
 
         uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
@@ -116,7 +116,7 @@ namespace lve {
 
         bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 
-        SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+        SwapchainSupportDetails querySwapchainSupport(VkPhysicalDevice device);
 
         VkInstance instance;
         VkDebugUtilsMessengerEXT debugMessenger;

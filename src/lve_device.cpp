@@ -202,7 +202,7 @@ namespace lve {
 
         bool swapChainAdequate = false;
         if (extensionsSupported) {
-            SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
+            SwapchainSupportDetails swapChainSupport = querySwapchainSupport(device);
             swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
         }
 
@@ -348,8 +348,8 @@ namespace lve {
         return indices;
     }
 
-    SwapChainSupportDetails LveDevice::querySwapChainSupport(VkPhysicalDevice device) {
-        SwapChainSupportDetails details;
+    SwapchainSupportDetails LveDevice::querySwapchainSupport(VkPhysicalDevice device) {
+        SwapchainSupportDetails details;
         vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface_, &details.capabilities);
 
         uint32_t formatCount;
