@@ -1,7 +1,6 @@
 #include <stdexcept>
 #include <array>
 #include "first_app.h"
-#include "fmt/core.h"
 
 namespace lve {
     FirstApp::FirstApp() {
@@ -113,37 +112,12 @@ namespace lve {
         }
     }
 
-    std::vector<LveModel::Vertex> iterateSierpinski(std::vector<LveModel::Vertex> originalTriangle) {
-        auto v1 = originalTriangle[0];
-        auto v2 = originalTriangle[1];
-        auto v3 = originalTriangle[2];
-
-        auto v12 = LveModel::Vertex{(v1.position + v2.position) / 2.0f};
-        auto v23 = LveModel::Vertex{(v2.position + v3.position) / 2.0f};
-        auto v31 = LveModel::Vertex{(v3.position + v1.position) / 2.0f};
-
-        return {v1, v12, v31,
-                v12, v2, v23,
-                v31, v23, v3};
-    }
-
     void FirstApp::loadModels() {
         std::vector<LveModel::Vertex> vertices{
-                {{0.0f,  -0.5f}},
-                {{0.5f,  0.5f}},
-                {{-0.5f, 0.5f}},
+                {{0.0f,  -0.5f}, {1.0f, 0.0f, 0.0f}},
+                {{0.5f,  0.5f},  {0.0f, 1.0f, 0.0f}},
+                {{-0.5f, 0.5f},  {0.0f, 0.0f, 1.0f}},
         };
-
-        for (int i = 0; i < 9; i++) {
-            std::vector<LveModel::Vertex> newVertices{};
-            for (int j = 0; j < vertices.size(); j += 3) {
-                const auto iteration = iterateSierpinski({vertices[j], vertices[j + 1], vertices[j + 2]});
-                newVertices.insert(newVertices.end(), iteration.begin(), iteration.end());
-            }
-
-            vertices = newVertices;
-        }
-
 
         lveModel = std::make_unique<LveModel>(lveDevice, vertices);
     }
