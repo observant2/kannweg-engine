@@ -7,44 +7,30 @@ find_package(glfw3 CONFIG REQUIRED)
 find_package(Vulkan REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 
-add_executable(v_engine
-        src/first_app.cpp
-        src/first_app.h
-        src/lve_window.cpp
-        src/lve_window.h
-        src/main.cpp
-        src/lve_pipeline.cpp
-        src/lve_pipeline.h
-        src/lve_device.cpp
-        src/lve_device.h
-        src/lve_swapchain.cpp
-        src/lve_swapchain.h)
+file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
+add_executable(${PROJECT_NAME} ${SOURCES})
 
 target_link_libraries(v_engine PRIVATE glfw Vulkan::Vulkan fmt::fmt)
 
+# get all .vert and .frag files in shaders directory
+file(GLOB_RECURSE GLSL_SOURCE_FILES
+        "${PROJECT_SOURCE_DIR}/shaders/*.frag"
+        "${PROJECT_SOURCE_DIR}/shaders/*.vert"
+)
 
-# AUTO COMPILE SHADERS ON BUILD
-
-add_custom_target(shaders)
-
-set(SHADER_FILES shaders/simple_shader.vert shaders/simple_shader.frag)
-
-set_source_files_properties(shaders/*.vert PROPERTIES ShaderType "vs")
-set_source_files_properties(shaders/*.frag PROPERTIES ShaderType "fs")
-
-foreach (FILE ${SHADER_FILES})
-    get_filename_component(FILE_WE ${FILE} NAME_WE)
-    get_source_file_property(shadertype ${FILE} ShaderType)
+foreach (GLSL ${GLSL_SOURCE_FILES})
+    get_filename_component(FILE_NAME ${GLSL} NAME)
+    set(SPIRV "${PROJECT_BINARY_DIR}/shaders/${FILE_NAME}.spv")
     add_custom_command(
-            TARGET shaders
-            COMMAND glslc.exe ${FILE} -o ${FILE}.spv
-            MAIN_DEPENDENCY ${FILE}
-            COMMENT "GLSL ${FILE}"
-            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-            VERBATIM
-    )
-    file(COPY ${FILE}.spv DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/shaders/)
+            OUTPUT ${SPIRV}
+            COMMAND glslc.exe ${GLSL} -o ${SPIRV}
+            DEPENDS ${GLSL})
+    list(APPEND SPIRV_BINARY_FILES ${SPIRV})
+endforeach (GLSL)
 
-endforeach (FILE)
+add_custom_target(
+        shaders
+        DEPENDS ${SPIRV_BINARY_FILES}
+)
 
 add_dependencies(${PROJECT_NAME} shaders)
