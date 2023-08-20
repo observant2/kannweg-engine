@@ -8,6 +8,7 @@
 // std lib headers
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace lve {
 
@@ -17,13 +18,15 @@ namespace lve {
 
         LveSwapchain(LveDevice& deviceRef, VkExtent2D windowExtent);
 
+        LveSwapchain(LveDevice& deviceRef, VkExtent2D windowExtent, std::shared_ptr<LveSwapchain> previous);
+
         ~LveSwapchain();
 
         LveSwapchain(const LveSwapchain&) = delete;
 
-        void operator=(const LveSwapchain&) = delete;
+        LveSwapchain& operator=(const LveSwapchain&) = delete;
 
-        VkFramebuffer getFrameBuffer(int index) { return swapChainFramebuffers[index]; }
+        VkFramebuffer getFrameBuffer(uint32_t index) { return swapChainFramebuffers[index]; }
 
         VkRenderPass getRenderPass() { return renderPass; }
 
@@ -50,6 +53,8 @@ namespace lve {
         VkResult submitCommandBuffers(const VkCommandBuffer* buffers, const uint32_t* imageIndex);
 
     private:
+        void init();
+
         void createSwapchain();
 
         void createImageViews();
@@ -87,6 +92,7 @@ namespace lve {
         VkExtent2D windowExtent;
 
         VkSwapchainKHR swapChain;
+        std::shared_ptr<LveSwapchain> oldSwapchain;
 
         std::vector<VkSemaphore> imageAvailableSemaphores;
         std::vector<VkSemaphore> renderFinishedSemaphores;

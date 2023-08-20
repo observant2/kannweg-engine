@@ -8,11 +8,23 @@
 #include <limits>
 #include <set>
 #include <stdexcept>
+#include <utility>
 
 namespace lve {
 
     LveSwapchain::LveSwapchain(LveDevice& deviceRef, VkExtent2D extent)
             : device{deviceRef}, windowExtent{extent} {
+        init();
+    }
+
+    LveSwapchain::LveSwapchain(LveDevice& deviceRef, VkExtent2D extent, std::shared_ptr<LveSwapchain> previous)
+            : device{deviceRef}, windowExtent{extent}, oldSwapchain{std::move(previous)} {
+        init();
+
+        oldSwapchain = nullptr;
+    }
+
+    void LveSwapchain::init() {
         createSwapchain();
         createImageViews();
         createRenderPass();
@@ -162,7 +174,7 @@ namespace lve {
         createInfo.presentMode = presentMode;
         createInfo.clipped = VK_TRUE;
 
-        createInfo.oldSwapchain = VK_NULL_HANDLE;
+        createInfo.oldSwapchain = oldSwapchain == nullptr ? VK_NULL_HANDLE : oldSwapchain->swapChain;
 
         if (vkCreateSwapchainKHR(device.device(), &createInfo, nullptr, &swapChain) != VK_SUCCESS) {
             throw std::runtime_error("failed to create swap chain!");
