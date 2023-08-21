@@ -1,62 +1,61 @@
 #pragma once
 
-#include <memory>
-#include "lve_window.h"
-#include "lve_swapchain.h"
 #include "lve_model.h"
+#include "lve_swapchain.h"
+#include "lve_window.h"
+#include <memory>
 
 namespace lve {
-    class LveRenderer {
-    public:
-        LveRenderer(LveWindow& window, LveDevice& device);
+class LveRenderer {
+public:
+  LveRenderer(LveWindow &window, LveDevice &device);
 
-        ~LveRenderer();
+  ~LveRenderer();
 
-        LveRenderer(const LveRenderer&) = delete;
+  LveRenderer(const LveRenderer &) = delete;
 
-        LveRenderer& operator=(const LveRenderer&) = delete;
+  LveRenderer &operator=(const LveRenderer &) = delete;
 
-        [[nodiscard]]
-        VkRenderPass getSwapchainRenderPass() const { return lveSwapchain->getRenderPass(); }
+  [[nodiscard]] VkRenderPass getSwapchainRenderPass() const {
+    return lveSwapchain->getRenderPass();
+  }
 
-        [[nodiscard]]
-        bool isFrameInProgress() const { return isFrameStarted; };
+  [[nodiscard]] bool isFrameInProgress() const { return isFrameStarted; };
 
-        [[nodiscard]]
-        VkCommandBuffer getCurrentCommandBuffer() const {
-            // TODO: do I really want a runtime assert here? :-/
-            assert(isFrameStarted && "Cannot get command buffer when frame not in progress");
-            return commandBuffers[currentFrameIndex];
-        }
+  [[nodiscard]] VkCommandBuffer getCurrentCommandBuffer() const {
+    // TODO: do I really want a runtime assert here? :-/
+    assert(isFrameStarted &&
+           "Cannot get command buffer when frame not in progress");
+    return commandBuffers[currentFrameIndex];
+  }
 
-        [[nodiscard]]
-        int getFrameIndex() const {
-            assert(isFrameStarted && "Cannot get frame index when frame not in progress");
-            return currentFrameIndex;
-        }
+  [[nodiscard]] int getFrameIndex() const {
+    assert(isFrameStarted &&
+           "Cannot get frame index when frame not in progress");
+    return currentFrameIndex;
+  }
 
-        VkCommandBuffer beginFrame();
+  VkCommandBuffer beginFrame();
 
-        void endFrame();
+  void endFrame();
 
-        void beginSwapchainRenderPass(VkCommandBuffer commandBuffer);
+  void beginSwapchainRenderPass(VkCommandBuffer commandBuffer);
+  void endSwapchainRenderPass(VkCommandBuffer commandBuffer);
 
-        void endSwapchainRenderPass(VkCommandBuffer commandBuffer);
+private:
+  void createCommandBuffers();
 
-    private:
-        void createCommandBuffers();
+  void freeCommandBuffers();
 
-        void freeCommandBuffers();
+  void recreateSwapchain();
 
-        void recreateSwapchain();
+  LveWindow &lveWindow;
+  LveDevice &lveDevice;
+  std::unique_ptr<LveSwapchain> lveSwapchain;
+  std::vector<VkCommandBuffer> commandBuffers;
 
-        LveWindow& lveWindow;
-        LveDevice& lveDevice;
-        std::unique_ptr<LveSwapchain> lveSwapchain;
-        std::vector<VkCommandBuffer> commandBuffers;
-
-        uint32_t currentImageIndex{};
-        int currentFrameIndex{};
-        bool isFrameStarted{false};
-    };
-}
+  uint32_t currentImageIndex{};
+  int currentFrameIndex{};
+  bool isFrameStarted{false};
+};
+} // namespace lve

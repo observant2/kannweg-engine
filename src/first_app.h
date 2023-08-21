@@ -1,34 +1,34 @@
 #pragma once
 
-#include <memory>
-#include "lve_window.h"
-#include "lve_model.h"
 #include "lve_game_object.h"
+#include "lve_model.h"
 #include "lve_renderer.h"
+#include "lve_window.h"
+#include <memory>
 
 namespace lve {
-    class FirstApp {
-    public:
-        static constexpr int WIDTH = 1800;
-        static constexpr int HEIGHT = 1800;
+class FirstApp {
+public:
+  static constexpr int WIDTH = 1800;
+  static constexpr int HEIGHT = 1800;
 
-        FirstApp();
+  FirstApp();
 
-        ~FirstApp();
+  ~FirstApp();
 
-        FirstApp(const FirstApp&) = delete;
+  FirstApp(const FirstApp &) = delete;
 
-        FirstApp& operator=(const FirstApp&) = delete;
+  FirstApp &operator=(const FirstApp &) = delete;
 
-        void run();
+  void run();
 
-    private:
-        void loadGameObjects();
+private:
+  void loadGameObjects();
 
-        LveWindow lveWindow{WIDTH, HEIGHT, "engine"};
-        LveDevice lveDevice{lveWindow};
-        LveRenderer lveRenderer{lveWindow, lveDevice};
+  LveWindow lveWindow{WIDTH, HEIGHT, "engine"};
+  LveDevice lveDevice{lveWindow};
+  LveRenderer lveRenderer{lveWindow, lveDevice};
 
-        std::vector<LveGameObject> gameObjects{};
-    };
-}
+  std::vector<LveGameObject> gameObjects{};
+};
+} // namespace lve
