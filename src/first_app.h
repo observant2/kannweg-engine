@@ -5,6 +5,7 @@
 #include "lve_pipeline.h"
 #include "lve_swapchain.h"
 #include "lve_model.h"
+#include "lve_game_object.h"
 
 namespace lve {
     class FirstApp {
@@ -23,7 +24,7 @@ namespace lve {
         void run();
 
     private:
-        void loadModels();
+        void loadGameObjects();
 
         void createPipelineLayout();
 
@@ -39,12 +40,14 @@ namespace lve {
 
         void recordCommandBuffer(uint32_t imageIndex);
 
+        void renderGameObjects(VkCommandBuffer commandBuffer);
+
         LveWindow lveWindow{WIDTH, HEIGHT, "engine"};
         LveDevice lveDevice{lveWindow};
         std::unique_ptr<LveSwapchain> lveSwapchain;
         std::unique_ptr<LvePipeline> lvePipeline;
         VkPipelineLayout pipelineLayout;
         std::vector<VkCommandBuffer> commandBuffers;
-        std::unique_ptr<LveModel> lveModel;
+        std::vector<LveGameObject> gameObjects{};
     };
 }
