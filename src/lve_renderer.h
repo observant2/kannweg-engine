@@ -8,16 +8,20 @@
 namespace lve {
 class LveRenderer {
 public:
-  LveRenderer(LveWindow &window, LveDevice &device);
+  LveRenderer(LveWindow& window, LveDevice& device);
 
   ~LveRenderer();
 
-  LveRenderer(const LveRenderer &) = delete;
+  LveRenderer(const LveRenderer&) = delete;
 
-  LveRenderer &operator=(const LveRenderer &) = delete;
+  LveRenderer& operator=(const LveRenderer&) = delete;
 
   [[nodiscard]] VkRenderPass getSwapchainRenderPass() const {
     return lveSwapchain->getRenderPass();
+  }
+
+  [[nodiscard]] float getAspectRatio() const {
+    return lveSwapchain->extentAspectRatio();
   }
 
   [[nodiscard]] bool isFrameInProgress() const { return isFrameStarted; };
@@ -49,8 +53,8 @@ private:
 
   void recreateSwapchain();
 
-  LveWindow &lveWindow;
-  LveDevice &lveDevice;
+  LveWindow& lveWindow;
+  LveDevice& lveDevice;
   std::unique_ptr<LveSwapchain> lveSwapchain;
   std::vector<VkCommandBuffer> commandBuffers;
 

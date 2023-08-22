@@ -57,13 +57,13 @@ public:
 
   [[nodiscard]] id_t getId() const { return id; }
 
-  LveGameObject(const LveGameObject &) = delete;
+  LveGameObject(const LveGameObject&) = delete;
 
-  LveGameObject &operator=(const LveGameObject &) = delete;
+  LveGameObject& operator=(const LveGameObject&) = delete;
 
-  LveGameObject(LveGameObject &&) = default;
+  LveGameObject(LveGameObject&&) = default;
 
-  LveGameObject &operator=(LveGameObject &&) = default;
+  LveGameObject& operator=(LveGameObject&&) = default;
 
   std::shared_ptr<LveModel> model{};
   glm::vec3 color{};

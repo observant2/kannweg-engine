@@ -21,22 +21,22 @@ public:
     getAttributeDescription();
   };
 
-  LveModel(LveDevice &device, const std::vector<Vertex> &vertices);
+  LveModel(LveDevice& device, const std::vector<Vertex>& vertices);
 
   ~LveModel();
 
-  LveModel(const LveModel &) = delete;
+  LveModel(const LveModel&) = delete;
 
-  LveModel &operator=(const LveModel &) = delete;
+  LveModel& operator=(const LveModel&) = delete;
 
   void bind(VkCommandBuffer commandBuffer);
 
   void draw(VkCommandBuffer commandBuffer) const;
 
 private:
-  void createVertexBuffers(const std::vector<Vertex> &vertices);
+  void createVertexBuffers(const std::vector<Vertex>& vertices);
 
-  LveDevice &lveDevice;
+  LveDevice& lveDevice;
   VkBuffer vertexBuffer{};
   VkDeviceMemory vertexBufferMemory{};
   uint32_t vertexCount{};

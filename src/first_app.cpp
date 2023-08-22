@@ -18,13 +18,25 @@ void FirstApp::run() {
   SimpleRenderSystem simpleRenderSystem{lveDevice,
                                         lveRenderer.getSwapchainRenderPass()};
 
+  LveCamera camera{};
+
   while (!lveWindow.shouldClose()) {
     glfwPollEvents();
+
+    float aspect = lveRenderer.getAspectRatio();
+
+    //    camera.setOrthographicProjection(-aspect, aspect, -1, 1, -1, 1);
+
+    camera.setPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 10.f);
+
+    //    camera.setViewDirection(glm::vec3{0.f}, glm::vec3{0.5, 0.f, 1.f});
+    camera.setViewTarget(glm::vec3{-1.f, -2.f, 2.f},
+                         glm::vec3{0.f, 0.f, 2.50f});
 
     if (auto commandBuffer = lveRenderer.beginFrame()) {
       lveRenderer.beginSwapchainRenderPass(commandBuffer);
 
-      simpleRenderSystem.renderGameObjects(commandBuffer, gameObjects);
+      simpleRenderSystem.renderGameObjects(commandBuffer, gameObjects, camera);
 
       lveRenderer.endSwapchainRenderPass(commandBuffer);
 
@@ -35,9 +47,8 @@ void FirstApp::run() {
   vkDeviceWaitIdle(lveDevice.device());
 }
 
-std::unique_ptr<LveModel> createCubeModel(LveDevice &device, glm::vec3 offset) {
+std::unique_ptr<LveModel> createCubeModel(LveDevice& device, glm::vec3 offset) {
   std::vector<LveModel::Vertex> vertices{
-
       // left face (white)
       {{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
       {{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
@@ -87,9 +98,11 @@ std::unique_ptr<LveModel> createCubeModel(LveDevice &device, glm::vec3 offset) {
       {{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
 
   };
-  for (auto &v : vertices) {
+
+  for (auto& v : vertices) {
     v.position += offset;
   }
+
   return std::make_unique<LveModel>(device, vertices);
 }
 
@@ -98,7 +111,7 @@ void FirstApp::loadGameObjects() {
       createCubeModel(lveDevice, {.0f, .0f, .0f})};
   auto cube = LveGameObject::createGameObject();
   cube.model = lveModel;
-  cube.transform.translation = {.0, .0f, .5f};
+  cube.transform.translation = {.0, .0f, 2.5f};
   cube.transform.scale = {.5f, .5f, .5f};
   gameObjects.push_back(std::move(cube));
 }

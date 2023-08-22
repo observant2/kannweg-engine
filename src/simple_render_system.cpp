@@ -1,5 +1,6 @@
 #include "simple_render_system.h"
 #include "glm/gtc/constants.hpp"
+#include "lve_camera.h"
 #include <array>
 #include <stdexcept>
 
@@ -14,7 +15,7 @@ struct SimplePushConstantData {
   alignas(16) glm::vec3 color;
 };
 
-SimpleRenderSystem::SimpleRenderSystem(LveDevice &device,
+SimpleRenderSystem::SimpleRenderSystem(LveDevice& device,
                                        VkRenderPass renderPass)
     : lveDevice{device} {
   createPipelineLayout();
@@ -58,10 +59,13 @@ void SimpleRenderSystem::createPipeline(VkRenderPass renderPass) {
 }
 
 void SimpleRenderSystem::renderGameObjects(
-    VkCommandBuffer commandBuffer, std::vector<LveGameObject> &gameObjects) {
+    VkCommandBuffer commandBuffer, std::vector<LveGameObject>& gameObjects,
+    const LveCamera& camera) {
   lvePipeline->bind(commandBuffer);
 
-  for (auto &obj : gameObjects) {
+  const auto projectionView = camera.getProjection() * camera.getView();
+
+  for (auto& obj : gameObjects) {
     obj.transform.rotation.y =
         glm::mod(obj.transform.rotation.y + 0.01f, glm::two_pi<float>());
     obj.transform.rotation.x =
@@ -69,7 +73,7 @@ void SimpleRenderSystem::renderGameObjects(
 
     SimplePushConstantData push{};
     push.color = obj.color;
-    push.transform = obj.transform.mat4();
+    push.transform = projectionView * obj.transform.mat4();
 
     vkCmdPushConstants(commandBuffer, pipelineLayout,
                        VK_SHADER_STAGE_VERTEX_BIT |
