@@ -1,7 +1,6 @@
 #pragma once
 
 #include "lve_game_object.h"
-#include "lve_model.h"
 #include "lve_renderer.h"
 #include "lve_window.h"
 #include <memory>
@@ -16,9 +15,9 @@ public:
 
   ~FirstApp();
 
-  FirstApp(const FirstApp &) = delete;
+  FirstApp(const FirstApp&) = delete;
 
-  FirstApp &operator=(const FirstApp &) = delete;
+  FirstApp& operator=(const FirstApp&) = delete;
 
   void run();
 

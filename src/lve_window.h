@@ -12,24 +12,26 @@ public:
 
   ~LveWindow();
 
-  LveWindow(const LveWindow &) = delete;
+  LveWindow(const LveWindow&) = delete;
 
-  LveWindow &operator=(const LveWindow &) = delete;
+  LveWindow& operator=(const LveWindow&) = delete;
 
   bool shouldClose() { return glfwWindowShouldClose(window); }
 
-  VkExtent2D getExtent() {
+  [[nodiscard]] VkExtent2D getExtent() const {
     return {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
   }
 
-  void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
+  void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 
   void resetWindowResizedFlag() { framebufferResized = false; }
 
   [[nodiscard]] bool wasWindowResized() const { return framebufferResized; }
 
+  [[nodiscard]] GLFWwindow* getGLFWwindow() const { return window; }
+
 private:
-  static void framebufferResizeCallback(GLFWwindow *window, int width,
+  static void framebufferResizeCallback(GLFWwindow* window, int width,
                                         int height);
 
   void initWindow();
@@ -39,6 +41,6 @@ private:
   bool framebufferResized = false;
 
   std::string windowName;
-  GLFWwindow *window;
+  GLFWwindow* window;
 };
 } // namespace lve

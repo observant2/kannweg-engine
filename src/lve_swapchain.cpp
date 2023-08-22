@@ -2,22 +2,19 @@
 
 // std
 #include <array>
-#include <cstdlib>
-#include <cstring>
 #include <iostream>
 #include <limits>
-#include <set>
 #include <stdexcept>
 #include <utility>
 
 namespace lve {
 
-LveSwapchain::LveSwapchain(LveDevice &deviceRef, VkExtent2D extent)
+LveSwapchain::LveSwapchain(LveDevice& deviceRef, VkExtent2D extent)
     : device{deviceRef}, windowExtent{extent} {
   init();
 }
 
-LveSwapchain::LveSwapchain(LveDevice &deviceRef, VkExtent2D extent,
+LveSwapchain::LveSwapchain(LveDevice& deviceRef, VkExtent2D extent,
                            std::shared_ptr<LveSwapchain> previous)
     : device{deviceRef}, windowExtent{extent},
       oldSwapchain{std::move(previous)} {
@@ -66,7 +63,7 @@ LveSwapchain::~LveSwapchain() {
   }
 }
 
-VkResult LveSwapchain::acquireNextImage(uint32_t *imageIndex) {
+VkResult LveSwapchain::acquireNextImage(uint32_t* imageIndex) {
   vkWaitForFences(device.device(), 1, &inFlightFences[currentFrame], VK_TRUE,
                   std::numeric_limits<uint64_t>::max());
 
@@ -79,8 +76,8 @@ VkResult LveSwapchain::acquireNextImage(uint32_t *imageIndex) {
   return result;
 }
 
-VkResult LveSwapchain::submitCommandBuffers(const VkCommandBuffer *buffers,
-                                            const uint32_t *imageIndex) {
+VkResult LveSwapchain::submitCommandBuffers(const VkCommandBuffer* buffers,
+                                            const uint32_t* imageIndex) {
   if (imagesInFlight[*imageIndex] != VK_NULL_HANDLE) {
     vkWaitForFences(device.device(), 1, &imagesInFlight[*imageIndex], VK_TRUE,
                     UINT64_MAX);
@@ -379,8 +376,8 @@ void LveSwapchain::createSyncObjects() {
 }
 
 VkSurfaceFormatKHR LveSwapchain::chooseSwapSurfaceFormat(
-    const std::vector<VkSurfaceFormatKHR> &availableFormats) {
-  for (const auto &availableFormat : availableFormats) {
+    const std::vector<VkSurfaceFormatKHR>& availableFormats) {
+  for (const auto& availableFormat : availableFormats) {
     if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB &&
         availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
       return availableFormat;
@@ -391,13 +388,13 @@ VkSurfaceFormatKHR LveSwapchain::chooseSwapSurfaceFormat(
 }
 
 VkPresentModeKHR LveSwapchain::chooseSwapPresentMode(
-    const std::vector<VkPresentModeKHR> &availablePresentModes) {
-  //        for (const auto& availablePresentMode: availablePresentModes) {
-  //            if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
-  //                std::cout << "Present mode: Mailbox" << std::endl;
-  //                return availablePresentMode;
-  //            }
-  //        }
+    const std::vector<VkPresentModeKHR>& availablePresentModes) {
+  for (const auto& availablePresentMode : availablePresentModes) {
+    if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
+      std::cout << "Present mode: Mailbox" << std::endl;
+      return availablePresentMode;
+    }
+  }
 
   //         for (const auto &availablePresentMode : availablePresentModes) {
   //           if (availablePresentMode == VK_PRESENT_MODE_IMMEDIATE_KHR) {
@@ -411,7 +408,7 @@ VkPresentModeKHR LveSwapchain::chooseSwapPresentMode(
 }
 
 VkExtent2D
-LveSwapchain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities) {
+LveSwapchain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
   if (capabilities.currentExtent.width !=
       std::numeric_limits<uint32_t>::max()) {
     return capabilities.currentExtent;
