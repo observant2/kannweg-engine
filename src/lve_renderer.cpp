@@ -5,7 +5,7 @@
 
 namespace lve {
 
-LveRenderer::LveRenderer(LveWindow &window, LveDevice &device)
+LveRenderer::LveRenderer(LveWindow& window, LveDevice& device)
     : lveWindow{window}, lveDevice{device} {
   recreateSwapchain();
   createCommandBuffers();
@@ -34,8 +34,6 @@ void LveRenderer::recreateSwapchain() {
       throw std::runtime_error("Swap chain image or depth format has changed!");
     }
   }
-
-  // TODO: come back here
 }
 
 void LveRenderer::createCommandBuffers() {

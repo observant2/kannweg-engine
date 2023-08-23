@@ -9,5 +9,8 @@
   }, {
     "name" : "fmt",
     "version>=" : "10.0.0"
+  }, {
+    "name" : "assimp",
+    "version>=" : "5.2.5"
   } ]
 }
