@@ -11,9 +11,16 @@ find_package(assimp CONFIG REQUIRED)
 file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-target_link_libraries(v_engine PRIVATE glfw Vulkan::Vulkan assimp::assimp fmt::fmt)
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw Vulkan::Vulkan assimp::assimp fmt::fmt)
 
-# get all .vert and .frag files in shaders directory
+# assets
+add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/assets
+        ${CMAKE_CURRENT_BINARY_DIR}/assets)
+
+# shaders
 file(GLOB_RECURSE GLSL_SOURCE_FILES
         "${PROJECT_SOURCE_DIR}/shaders/*.frag"
         "${PROJECT_SOURCE_DIR}/shaders/*.vert"

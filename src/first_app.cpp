@@ -1,9 +1,14 @@
 #include "first_app.h"
+#include "fmt/core.h"
 #include "keyboard_movement_controller.h"
 #include "lve_camera.h"
 #include "simple_render_system.h"
 #include <array>
 #include <chrono>
+
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -16,6 +21,7 @@ FirstApp::FirstApp() { loadGameObjects(); }
 FirstApp::~FirstApp() = default;
 
 void FirstApp::run() {
+
   SimpleRenderSystem simpleRenderSystem{lveDevice,
                                         lveRenderer.getSwapchainRenderPass()};
 
@@ -62,59 +68,44 @@ void FirstApp::run() {
 
 // temporary helper function, creates a 1x1x1 cube centered at offset with an
 // index buffer
-std::unique_ptr<LveModel> createCubeModel(LveDevice& device, glm::vec3 offset) {
+std::unique_ptr<LveModel> loadModel(LveDevice& device, glm::vec3 offset) {
   LveModel::Builder modelBuilder{};
-  modelBuilder.vertices = {
-      // left face (white)
-      {{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
-      {{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
-      {{-.5f, -.5f, .5f}, {.9f, .9f, .9f}},
-      {{-.5f, .5f, -.5f}, {.9f, .9f, .9f}},
+  Assimp::Importer importer{};
+  const aiScene* scene =
+      importer.ReadFile("./assets/cog.gltf", aiProcess_Triangulate);
 
-      // right face (yellow)
-      {{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
-      {{.5f, .5f, .5f}, {.8f, .8f, .1f}},
-      {{.5f, -.5f, .5f}, {.8f, .8f, .1f}},
-      {{.5f, .5f, -.5f}, {.8f, .8f, .1f}},
+  assert(scene != nullptr && "Couldn't load  model!");
 
-      // top face (orange, remember y axis points down)
-      {{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
-      {{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
-      {{-.5f, -.5f, .5f}, {.9f, .6f, .1f}},
-      {{.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
+  modelBuilder.vertices.resize(scene->mMeshes[0]->mNumVertices);
 
-      // bottom face (red)
-      {{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
-      {{.5f, .5f, .5f}, {.8f, .1f, .1f}},
-      {{-.5f, .5f, .5f}, {.8f, .1f, .1f}},
-      {{.5f, .5f, -.5f}, {.8f, .1f, .1f}},
+  const auto mesh = scene->mMeshes[0];
 
-      // nose face (blue)
-      {{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
-      {{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
-      {{-.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
-      {{.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
+  for (int i = 0; i < mesh->mNumVertices; i++) {
+    const auto vertex = mesh->mVertices[i];
+    modelBuilder.vertices[i].position = {vertex.x, vertex.y, vertex.z};
+    modelBuilder.vertices[i].color = {0.3f, 0.0f, 0.5f};
+  }
 
-      // tail face (green)
-      {{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
-      {{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
-      {{-.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
-      {{.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
-  };
   for (auto& v : modelBuilder.vertices) {
     v.position += offset;
   }
 
-  modelBuilder.indices = {0,  1,  2,  0,  3,  1,  4,  5,  6,  4,  7,  5,
-                          8,  9,  10, 8,  11, 9,  12, 13, 14, 12, 15, 13,
-                          16, 17, 18, 16, 19, 17, 20, 21, 22, 20, 23, 21};
+  modelBuilder.indices.resize(mesh->mNumFaces * 3);
+
+  for (int i = 0; i < mesh->mNumFaces; i++) {
+    const auto face = mesh->mFaces[i];
+    assert(face.mNumIndices == 3 &&
+           "model faces are expected to be triangles!");
+    for (int j = 0; j < face.mNumIndices; j++) {
+      modelBuilder.indices[i * 3 + j] = face.mIndices[j];
+    }
+  }
 
   return std::make_unique<LveModel>(device, modelBuilder);
 }
 
 void FirstApp::loadGameObjects() {
-  std::shared_ptr<LveModel> lveModel{
-      createCubeModel(lveDevice, {.0f, .0f, .0f})};
+  std::shared_ptr<LveModel> lveModel{loadModel(lveDevice, {.0f, .0f, .0f})};
   auto cube = LveGameObject::createGameObject();
   cube.model = lveModel;
   cube.transform.translation = {.0, .0f, 2.5f};
