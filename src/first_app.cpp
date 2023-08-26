@@ -1,7 +1,7 @@
 #include "first_app.h"
 #include "fmt/core.h"
-#include "keyboard_movement_controller.h"
 #include "lve_camera.h"
+#include "movement_controller.h"
 #include "simple_render_system.h"
 #include <array>
 #include <chrono>
@@ -28,7 +28,7 @@ void FirstApp::run() {
   LveCamera camera{};
 
   auto viewerObject = LveGameObject::createGameObject();
-  KeyboardMovementController cameraController{};
+  MovementController cameraController{};
 
   auto currentTime = std::chrono::high_resolution_clock::now();
 
@@ -45,6 +45,8 @@ void FirstApp::run() {
 
     cameraController.moveInPlaneXZ(lveWindow.getGLFWwindow(), frameTime,
                                    viewerObject);
+    cameraController.handleMouseMovement(lveWindow.getGLFWwindow(), frameTime,
+                                         viewerObject);
     camera.setViewYXZ(viewerObject.transform.translation,
                       viewerObject.transform.rotation);
 
@@ -105,7 +107,8 @@ std::unique_ptr<LveModel> loadModel(LveDevice& device, glm::vec3 offset) {
 }
 
 void FirstApp::loadGameObjects() {
-  std::shared_ptr<LveModel> lveModel{loadModel(lveDevice, {.0f, .0f, .0f})};
+  std::shared_ptr<LveModel> lveModel =
+      LveModel::createModelFromFile(lveDevice, "./assets/smooth_vase.obj");
   auto cube = LveGameObject::createGameObject();
   cube.model = lveModel;
   cube.transform.translation = {.0, .0f, 2.5f};

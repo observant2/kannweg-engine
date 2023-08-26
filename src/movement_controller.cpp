@@ -1,28 +1,10 @@
 
-#include "keyboard_movement_controller.h"
+#include "movement_controller.h"
 
 namespace lve {
 
-void KeyboardMovementController::moveInPlaneXZ(GLFWwindow* window, float dt,
-                                               LveGameObject& gameObject) {
-  glm::vec3 rotate{};
-
-  if (glfwGetKey(window, keys.lookRight) == GLFW_PRESS) {
-    rotate.y += 1.f;
-  }
-  if (glfwGetKey(window, keys.lookLeft) == GLFW_PRESS) {
-    rotate.y -= 1.f;
-  }
-  if (glfwGetKey(window, keys.lookUp) == GLFW_PRESS) {
-    rotate.x += 1.f;
-  }
-  if (glfwGetKey(window, keys.lookDown) == GLFW_PRESS) {
-    rotate.x -= 1.f;
-  }
-
-  if (glm::dot(rotate, rotate) > std::numeric_limits<float>::epsilon()) {
-    gameObject.transform.rotation += lookSpeed * dt * glm::normalize(rotate);
-  }
+void MovementController::moveInPlaneXZ(GLFWwindow* window, float dt,
+                                       LveGameObject& gameObject) {
 
   gameObject.transform.rotation.x =
       glm::clamp(gameObject.transform.rotation.x, -1.5f, 1.5f);
@@ -60,4 +42,26 @@ void KeyboardMovementController::moveInPlaneXZ(GLFWwindow* window, float dt,
         moveSpeed * dt * glm::normalize(moveDir);
   }
 }
+void MovementController::handleMouseMovement(GLFWwindow* window, float dt,
+                                             LveGameObject& gameObject) {
+  glm::vec3 rotate{};
+
+  double x{}, y{};
+
+  glfwGetCursorPos(window, &x, &y);
+
+  float xDiff = (static_cast<float>(x) - currentX);
+  float yDiff = (static_cast<float>(y) - currentY);
+
+  currentX = static_cast<float>(x);
+  currentY = static_cast<float>(y);
+
+  rotate.x -= yDiff;
+  rotate.y += xDiff;
+
+  if (glm::dot(rotate, rotate) > std::numeric_limits<float>::epsilon()) {
+    gameObject.transform.rotation += lookSpeed * dt * glm::normalize(rotate);
+  }
+}
+
 } // namespace lve

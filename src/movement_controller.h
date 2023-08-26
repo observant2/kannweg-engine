@@ -6,7 +6,7 @@
 
 namespace lve {
 
-class KeyboardMovementController {
+class MovementController {
 public:
   struct KeyMappings {
     int moveLeft = GLFW_KEY_A;
@@ -23,8 +23,15 @@ public:
 
   void moveInPlaneXZ(GLFWwindow* window, float dt, LveGameObject& gameObject);
 
+  void handleMouseMovement(GLFWwindow* window, float dt,
+                           LveGameObject& gameObject);
+
   KeyMappings keys{};
   float moveSpeed{3.f};
-  float lookSpeed{1.5f};
+  float lookSpeed{5.5f};
+
+  float currentX{};
+  float currentY{};
 };
+
 } // namespace lve
