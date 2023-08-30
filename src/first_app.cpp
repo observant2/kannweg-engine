@@ -13,14 +13,30 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 
+#include "lve_buffer.h"
 #include <glm/glm.hpp>
 
 namespace lve {
+struct GlobalUbo {
+  glm::mat4 projectionView{1.f};
+  glm::vec3 lightDirection = glm::normalize(glm::vec3(1.f, -3.f, -1.f));
+};
+
 FirstApp::FirstApp() { loadGameObjects(); }
 
 FirstApp::~FirstApp() = default;
 
 void FirstApp::run() {
+  std::vector<std::unique_ptr<LveBuffer>> uboBuffers(
+      LveSwapchain::MAX_FRAMES_IN_FLIGHT);
+
+  for (int i = 0; i < uboBuffers.size(); i++) {
+    uboBuffers[i] = std::make_unique<LveBuffer>(
+        lveDevice, sizeof(GlobalUbo), 1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+        lveDevice.properties.limits.minUniformBufferOffsetAlignment);
+    uboBuffers[i]->map();
+  }
 
   SimpleRenderSystem simpleRenderSystem{lveDevice,
                                         lveRenderer.getSwapchainRenderPass()};
@@ -28,7 +44,7 @@ void FirstApp::run() {
   LveCamera camera{};
 
   auto viewerObject = LveGameObject::createGameObject();
-  MovementController cameraController{};
+  MovementController cameraController{lveWindow.getGLFWwindow()};
 
   auto currentTime = std::chrono::high_resolution_clock::now();
 
@@ -43,21 +59,30 @@ void FirstApp::run() {
 
     currentTime = newTime;
 
-    cameraController.moveInPlaneXZ(lveWindow.getGLFWwindow(), frameTime,
-                                   viewerObject);
     cameraController.handleMouseMovement(lveWindow.getGLFWwindow(), frameTime,
                                          viewerObject);
     camera.setViewYXZ(viewerObject.transform.translation,
                       viewerObject.transform.rotation);
+    cameraController.moveInPlaneXZ(lveWindow.getGLFWwindow(), frameTime,
+                                   viewerObject);
 
     float aspect = lveRenderer.getAspectRatio();
 
     camera.setPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 10.f);
 
     if (auto commandBuffer = lveRenderer.beginFrame()) {
+      int frameIndex = lveRenderer.getFrameIndex();
+      FrameInfo frameInfo{frameIndex, frameTime, commandBuffer, camera};
+      // update
+      GlobalUbo ubo{};
+      ubo.projectionView = camera.getProjection() * camera.getView();
+      uboBuffers[frameIndex]->writeToBuffer(&ubo);
+      uboBuffers[frameIndex]->flush();
+
+      // render
       lveRenderer.beginSwapchainRenderPass(commandBuffer);
 
-      simpleRenderSystem.renderGameObjects(commandBuffer, gameObjects, camera);
+      simpleRenderSystem.renderGameObjects(frameInfo, gameObjects);
 
       lveRenderer.endSwapchainRenderPass(commandBuffer);
 
@@ -68,51 +93,19 @@ void FirstApp::run() {
   vkDeviceWaitIdle(lveDevice.device());
 }
 
-// temporary helper function, creates a 1x1x1 cube centered at offset with an
-// index buffer
-std::unique_ptr<LveModel> loadModel(LveDevice& device, glm::vec3 offset) {
-  LveModel::Builder modelBuilder{};
-  Assimp::Importer importer{};
-  const aiScene* scene =
-      importer.ReadFile("./assets/cog.gltf", aiProcess_Triangulate);
-
-  assert(scene != nullptr && "Couldn't load  model!");
-
-  modelBuilder.vertices.resize(scene->mMeshes[0]->mNumVertices);
-
-  const auto mesh = scene->mMeshes[0];
-
-  for (int i = 0; i < mesh->mNumVertices; i++) {
-    const auto vertex = mesh->mVertices[i];
-    modelBuilder.vertices[i].position = {vertex.x, vertex.y, vertex.z};
-    modelBuilder.vertices[i].color = {0.3f, 0.0f, 0.5f};
-  }
-
-  for (auto& v : modelBuilder.vertices) {
-    v.position += offset;
-  }
-
-  modelBuilder.indices.resize(mesh->mNumFaces * 3);
-
-  for (int i = 0; i < mesh->mNumFaces; i++) {
-    const auto face = mesh->mFaces[i];
-    assert(face.mNumIndices == 3 &&
-           "model faces are expected to be triangles!");
-    for (int j = 0; j < face.mNumIndices; j++) {
-      modelBuilder.indices[i * 3 + j] = face.mIndices[j];
-    }
-  }
-
-  return std::make_unique<LveModel>(device, modelBuilder);
-}
-
 void FirstApp::loadGameObjects() {
   std::shared_ptr<LveModel> lveModel =
       LveModel::createModelFromFile(lveDevice, "./assets/smooth_vase.obj");
   auto cube = LveGameObject::createGameObject();
   cube.model = lveModel;
-  cube.transform.translation = {.0, .0f, 2.5f};
-  cube.transform.scale = {.5f, .5f, .5f};
+  cube.transform.translation = {.0, .0f, 2.0f};
+  cube.transform.scale = {1.5f, 1.5f, 1.5f};
   gameObjects.push_back(std::move(cube));
+
+  auto cube2 = LveGameObject::createGameObject();
+  cube2.model = lveModel;
+  cube2.transform.translation = {1.0, .0f, 2.0f};
+  cube2.transform.scale = {1.5f, 1.5f, 1.5f};
+  gameObjects.push_back(std::move(cube2));
 }
 } // namespace lve

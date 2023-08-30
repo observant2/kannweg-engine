@@ -1,15 +1,11 @@
 
 #include "movement_controller.h"
+#include "fmt/core.h"
 
 namespace lve {
 
 void MovementController::moveInPlaneXZ(GLFWwindow* window, float dt,
-                                       LveGameObject& gameObject) {
-
-  gameObject.transform.rotation.x =
-      glm::clamp(gameObject.transform.rotation.x, -1.5f, 1.5f);
-  gameObject.transform.rotation.y =
-      glm::mod(gameObject.transform.rotation.y, glm::two_pi<float>());
+                                       LveGameObject& gameObject) const {
 
   float yaw = gameObject.transform.rotation.y;
   const glm::vec3 forwardDir{sin(yaw), 0.f, cos(yaw)};
@@ -50,18 +46,22 @@ void MovementController::handleMouseMovement(GLFWwindow* window, float dt,
 
   glfwGetCursorPos(window, &x, &y);
 
-  float xDiff = (static_cast<float>(x) - currentX);
-  float yDiff = (static_cast<float>(y) - currentY);
+  float xDiff = (static_cast<float>(x) - lastX);
+  float yDiff = (static_cast<float>(y) - lastY);
 
-  currentX = static_cast<float>(x);
-  currentY = static_cast<float>(y);
+  lastX = static_cast<float>(x);
+  lastY = static_cast<float>(y);
 
-  rotate.x -= yDiff;
-  rotate.y += xDiff;
+  gameObject.transform.rotation.y +=
+      glm::mod(dt * xDiff * lookSpeed, glm::two_pi<float>());
+  gameObject.transform.rotation.x -=
+      glm::clamp(dt * yDiff * lookSpeed, -1.5f, 1.5f);
 
-  if (glm::dot(rotate, rotate) > std::numeric_limits<float>::epsilon()) {
-    gameObject.transform.rotation += lookSpeed * dt * glm::normalize(rotate);
-  }
+  int width, height;
+  glfwGetWindowSize(window, &width, &height);
+  glfwSetCursorPos(window, width / 2.f, height / 2.f);
+  lastX = width / 2.f;
+  lastY = height / 2.f;
 }
 
 } // namespace lve

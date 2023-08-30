@@ -12,42 +12,32 @@ LveModel::LveModel(LveDevice& device, const LveModel::Builder& builder)
   createIndexBuffer(builder.indices);
 }
 
-LveModel::~LveModel() {
-  vkDestroyBuffer(lveDevice.device(), vertexBuffer, nullptr);
-  vkFreeMemory(lveDevice.device(), vertexBufferMemory, nullptr);
-
-  if (hasIndexBuffer) {
-    vkDestroyBuffer(lveDevice.device(), indexBuffer, nullptr);
-    vkFreeMemory(lveDevice.device(), indexBufferMemory, nullptr);
-  }
-}
+LveModel::~LveModel() {}
 
 void LveModel::createVertexBuffers(const std::vector<Vertex>& vertices) {
   vertexCount = static_cast<uint32_t>(vertices.size());
   assert(vertexCount >= 3 && "Vertex count must be at least 3");
 
   VkDeviceSize bufferSize = sizeof(vertices[0]) * vertexCount;
+  uint32_t vertexSize = sizeof(vertices[0]);
 
-  VkBuffer stagingBuffer;
-  VkDeviceMemory stagingBufferMemory;
-  lveDevice.createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                             VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                         stagingBuffer, stagingBufferMemory);
+  LveBuffer stagingBuffer{lveDevice, vertexSize, vertexCount,
+                          VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                          VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                              VK_MEMORY_PROPERTY_HOST_COHERENT_BIT};
 
-  void* data;
-  vkMapMemory(lveDevice.device(), stagingBufferMemory, 0, bufferSize, 0, &data);
-  memcpy(data, vertices.data(), static_cast<size_t>(bufferSize));
-  vkUnmapMemory(lveDevice.device(), stagingBufferMemory);
+  stagingBuffer.map();
+  stagingBuffer.writeToBuffer((void*)vertices.data());
 
-  lveDevice.createBuffer(
-      bufferSize,
+  vertexBuffer = std::make_unique<LveBuffer>(
+      lveDevice, vertexSize, vertexCount,
+
       VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory);
-  lveDevice.copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
+      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-  vkDestroyBuffer(lveDevice.device(), stagingBuffer, nullptr);
-  vkFreeMemory(lveDevice.device(), stagingBufferMemory, nullptr);
+  lveDevice.copyBuffer(stagingBuffer.getBuffer(), vertexBuffer->getBuffer(),
+                       // kann weg?
+                       bufferSize);
 }
 
 void LveModel::createIndexBuffer(const std::vector<uint32_t>& indices) {
@@ -59,34 +49,34 @@ void LveModel::createIndexBuffer(const std::vector<uint32_t>& indices) {
   }
 
   VkDeviceSize bufferSize = sizeof(indices[0]) * indexCount;
-  VkBuffer stagingBuffer;
-  VkDeviceMemory stagingBufferMemory;
-  lveDevice.createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                             VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                         stagingBuffer, stagingBufferMemory);
+  uint32_t indexSize = sizeof(indices[0]);
 
-  void* data;
-  vkMapMemory(lveDevice.device(), stagingBufferMemory, 0, bufferSize, 0, &data);
-  memcpy(data, indices.data(), static_cast<size_t>(bufferSize));
-  vkUnmapMemory(lveDevice.device(), stagingBufferMemory);
+  LveBuffer stagingBuffer{lveDevice, indexSize, indexCount,
+                          VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                          VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                              VK_MEMORY_PROPERTY_HOST_COHERENT_BIT};
 
-  lveDevice.createBuffer(
-      bufferSize,
+  stagingBuffer.map();
+  stagingBuffer.writeToBuffer((void*)indices.data());
+
+  indexBuffer = std::make_unique<LveBuffer>(
+      lveDevice, indexSize, vertexCount,
+
       VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
-  lveDevice.copyBuffer(stagingBuffer, indexBuffer, bufferSize);
+      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-  vkDestroyBuffer(lveDevice.device(), stagingBuffer, nullptr);
-  vkFreeMemory(lveDevice.device(), stagingBufferMemory, nullptr);
+  lveDevice.copyBuffer(stagingBuffer.getBuffer(), indexBuffer->getBuffer(),
+                       // kann weg?
+                       bufferSize);
 }
 
 void LveModel::bind(VkCommandBuffer commandBuffer) {
-  VkBuffer buffers[] = {vertexBuffer};
+  VkBuffer buffers[] = {vertexBuffer->getBuffer()};
   VkDeviceSize offsets[] = {0};
   vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
   if (hasIndexBuffer) {
-    vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+    vkCmdBindIndexBuffer(commandBuffer, indexBuffer->getBuffer(), 0,
+                         VK_INDEX_TYPE_UINT32);
   }
 }
 
@@ -119,17 +109,22 @@ LveModel::Vertex::getBindingDescription() {
 
 std::vector<VkVertexInputAttributeDescription>
 LveModel::Vertex::getAttributeDescription() {
-  std::vector<VkVertexInputAttributeDescription> attributeDescriptions{2};
-  attributeDescriptions[0].binding = 0;
-  attributeDescriptions[0].location = 0;
-  attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-  attributeDescriptions[0].offset = offsetof(Vertex, position);
+  std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
+  attributeDescriptions.push_back(
+      {0, 0, VK_FORMAT_R32G32B32_SFLOAT,
+       static_cast<uint32_t>(offsetof(Vertex, position))});
 
-  attributeDescriptions[1].binding = 0;
-  attributeDescriptions[1].location = 1;
-  attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-  attributeDescriptions[1].offset = offsetof(Vertex, color);
+  attributeDescriptions.push_back(
+      {1, 0, VK_FORMAT_R32G32B32_SFLOAT,
+       static_cast<uint32_t>(offsetof(Vertex, color))});
 
+  attributeDescriptions.push_back(
+      {2, 0, VK_FORMAT_R32G32B32_SFLOAT,
+       static_cast<uint32_t>(offsetof(Vertex, normal))});
+
+  attributeDescriptions.push_back(
+      {3, 0, VK_FORMAT_R32G32_SFLOAT,
+       static_cast<uint32_t>(offsetof(Vertex, uv))});
   return attributeDescriptions;
 }
 
@@ -148,7 +143,7 @@ void LveModel::Builder::loadModel(const std::string& filepath) {
   for (int i = 0; i < mesh->mNumVertices; i++) {
     const auto vertex = mesh->mVertices[i];
     vertices[i].position = {vertex.x, vertex.y, vertex.z};
-    vertices[i].color = {0.3f, 0.0f, 0.5f};
+    vertices[i].color = {0.3f, 0.0f, 0.2f};
 
     const auto normal = mesh->mNormals[i];
     vertices[i].normal = {normal.x, normal.y, normal.z};

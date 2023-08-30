@@ -8,6 +8,16 @@ namespace lve {
 
 class MovementController {
 public:
+  explicit MovementController(GLFWwindow* window) {
+    int width{}, height{};
+    glfwGetWindowSize(window, &width, &height);
+
+    lastX = static_cast<float>(width) / 2.0f;
+    lastY = static_cast<float>(height) / 2.0f;
+
+    glfwSetCursorPos(window, lastX, lastY);
+  }
+
   struct KeyMappings {
     int moveLeft = GLFW_KEY_A;
     int moveRight = GLFW_KEY_D;
@@ -21,17 +31,18 @@ public:
     int lookDown = GLFW_KEY_DOWN;
   };
 
-  void moveInPlaneXZ(GLFWwindow* window, float dt, LveGameObject& gameObject);
+  void moveInPlaneXZ(GLFWwindow* window, float dt,
+                     LveGameObject& gameObject) const;
 
   void handleMouseMovement(GLFWwindow* window, float dt,
                            LveGameObject& gameObject);
 
   KeyMappings keys{};
   float moveSpeed{3.f};
-  float lookSpeed{5.5f};
+  float lookSpeed{1.5f};
 
-  float currentX{};
-  float currentY{};
+  float lastX{};
+  float lastY{};
 };
 
 } // namespace lve
