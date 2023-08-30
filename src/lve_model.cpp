@@ -6,8 +6,7 @@
 #include <fmt/core.h>
 
 namespace lve {
-LveModel::LveModel(LveDevice& device, const LveModel::Builder& builder)
-    : lveDevice(device) {
+LveModel::LveModel(LveDevice& device, const LveModel::Builder& builder) : lveDevice(device) {
   createVertexBuffers(builder.vertices);
   createIndexBuffer(builder.indices);
 }
@@ -21,19 +20,18 @@ void LveModel::createVertexBuffers(const std::vector<Vertex>& vertices) {
   VkDeviceSize bufferSize = sizeof(vertices[0]) * vertexCount;
   uint32_t vertexSize = sizeof(vertices[0]);
 
-  LveBuffer stagingBuffer{lveDevice, vertexSize, vertexCount,
-                          VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+  LveBuffer stagingBuffer{lveDevice, vertexSize, vertexCount, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                           VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                               VK_MEMORY_PROPERTY_HOST_COHERENT_BIT};
 
   stagingBuffer.map();
   stagingBuffer.writeToBuffer((void*)vertices.data());
 
-  vertexBuffer = std::make_unique<LveBuffer>(
-      lveDevice, vertexSize, vertexCount,
+  vertexBuffer = std::make_unique<LveBuffer>(lveDevice, vertexSize, vertexCount,
 
-      VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+                                             VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
+                                                 VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+                                             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
   lveDevice.copyBuffer(stagingBuffer.getBuffer(), vertexBuffer->getBuffer(),
                        // kann weg?
@@ -51,19 +49,18 @@ void LveModel::createIndexBuffer(const std::vector<uint32_t>& indices) {
   VkDeviceSize bufferSize = sizeof(indices[0]) * indexCount;
   uint32_t indexSize = sizeof(indices[0]);
 
-  LveBuffer stagingBuffer{lveDevice, indexSize, indexCount,
-                          VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+  LveBuffer stagingBuffer{lveDevice, indexSize, indexCount, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                           VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                               VK_MEMORY_PROPERTY_HOST_COHERENT_BIT};
 
   stagingBuffer.map();
   stagingBuffer.writeToBuffer((void*)indices.data());
 
-  indexBuffer = std::make_unique<LveBuffer>(
-      lveDevice, indexSize, vertexCount,
+  indexBuffer = std::make_unique<LveBuffer>(lveDevice, indexSize, vertexCount,
 
-      VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+                                            VK_BUFFER_USAGE_INDEX_BUFFER_BIT |
+                                                VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+                                            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
   lveDevice.copyBuffer(stagingBuffer.getBuffer(), indexBuffer->getBuffer(),
                        // kann weg?
@@ -75,8 +72,7 @@ void LveModel::bind(VkCommandBuffer commandBuffer) {
   VkDeviceSize offsets[] = {0};
   vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
   if (hasIndexBuffer) {
-    vkCmdBindIndexBuffer(commandBuffer, indexBuffer->getBuffer(), 0,
-                         VK_INDEX_TYPE_UINT32);
+    vkCmdBindIndexBuffer(commandBuffer, indexBuffer->getBuffer(), 0, VK_INDEX_TYPE_UINT32);
   }
 }
 
@@ -87,8 +83,8 @@ void LveModel::draw(VkCommandBuffer commandBuffer) const {
   vkCmdDraw(commandBuffer, vertexCount, 1, 0, 0);
 }
 
-std::unique_ptr<LveModel>
-LveModel::createModelFromFile(LveDevice& device, const std::string& filepath) {
+std::unique_ptr<LveModel> LveModel::createModelFromFile(LveDevice& device,
+                                                        const std::string& filepath) {
   Builder builder{};
   builder.loadModel(filepath);
 
@@ -97,8 +93,7 @@ LveModel::createModelFromFile(LveDevice& device, const std::string& filepath) {
   return std::make_unique<LveModel>(device, builder);
 }
 
-std::vector<VkVertexInputBindingDescription>
-LveModel::Vertex::getBindingDescription() {
+std::vector<VkVertexInputBindingDescription> LveModel::Vertex::getBindingDescription() {
   std::vector<VkVertexInputBindingDescription> bindingDescriptions{1};
   bindingDescriptions[0].binding = 0;
   bindingDescriptions[0].stride = sizeof(Vertex);
@@ -107,24 +102,19 @@ LveModel::Vertex::getBindingDescription() {
   return bindingDescriptions;
 }
 
-std::vector<VkVertexInputAttributeDescription>
-LveModel::Vertex::getAttributeDescription() {
+std::vector<VkVertexInputAttributeDescription> LveModel::Vertex::getAttributeDescription() {
   std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
   attributeDescriptions.push_back(
-      {0, 0, VK_FORMAT_R32G32B32_SFLOAT,
-       static_cast<uint32_t>(offsetof(Vertex, position))});
+      {0, 0, VK_FORMAT_R32G32B32_SFLOAT, static_cast<uint32_t>(offsetof(Vertex, position))});
 
   attributeDescriptions.push_back(
-      {1, 0, VK_FORMAT_R32G32B32_SFLOAT,
-       static_cast<uint32_t>(offsetof(Vertex, color))});
+      {1, 0, VK_FORMAT_R32G32B32_SFLOAT, static_cast<uint32_t>(offsetof(Vertex, color))});
 
   attributeDescriptions.push_back(
-      {2, 0, VK_FORMAT_R32G32B32_SFLOAT,
-       static_cast<uint32_t>(offsetof(Vertex, normal))});
+      {2, 0, VK_FORMAT_R32G32B32_SFLOAT, static_cast<uint32_t>(offsetof(Vertex, normal))});
 
   attributeDescriptions.push_back(
-      {3, 0, VK_FORMAT_R32G32_SFLOAT,
-       static_cast<uint32_t>(offsetof(Vertex, uv))});
+      {3, 0, VK_FORMAT_R32G32_SFLOAT, static_cast<uint32_t>(offsetof(Vertex, uv))});
   return attributeDescriptions;
 }
 
@@ -172,8 +162,7 @@ void LveModel::Builder::loadModel(const std::string& filepath) {
 
   for (int i = 0; i < mesh->mNumFaces; i++) {
     const auto face = mesh->mFaces[i];
-    assert(face.mNumIndices == 3 &&
-           "model faces are expected to be triangles!");
+    assert(face.mNumIndices == 3 && "model faces are expected to be triangles!");
     for (int j = 0; j < face.mNumIndices; j++) {
       indices[i * 3 + j] = face.mIndices[j];
     }

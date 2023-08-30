@@ -21,8 +21,7 @@ public:
 
     static std::vector<VkVertexInputBindingDescription> getBindingDescription();
 
-    static std::vector<VkVertexInputAttributeDescription>
-    getAttributeDescription();
+    static std::vector<VkVertexInputAttributeDescription> getAttributeDescription();
   };
 
   struct Builder {
@@ -38,8 +37,8 @@ public:
   LveModel(const LveModel&) = delete;
   LveModel& operator=(const LveModel&) = delete;
 
-  static std::unique_ptr<LveModel>
-  createModelFromFile(LveDevice& device, const std::string& filepath);
+  static std::unique_ptr<LveModel> createModelFromFile(LveDevice& device,
+                                                       const std::string& filepath);
 
   void bind(VkCommandBuffer commandBuffer);
   void draw(VkCommandBuffer commandBuffer) const;

@@ -27,8 +27,7 @@ FirstApp::FirstApp() { loadGameObjects(); }
 FirstApp::~FirstApp() = default;
 
 void FirstApp::run() {
-  std::vector<std::unique_ptr<LveBuffer>> uboBuffers(
-      LveSwapchain::MAX_FRAMES_IN_FLIGHT);
+  std::vector<std::unique_ptr<LveBuffer>> uboBuffers(LveSwapchain::MAX_FRAMES_IN_FLIGHT);
 
   for (int i = 0; i < uboBuffers.size(); i++) {
     uboBuffers[i] = std::make_unique<LveBuffer>(
@@ -38,8 +37,7 @@ void FirstApp::run() {
     uboBuffers[i]->map();
   }
 
-  SimpleRenderSystem simpleRenderSystem{lveDevice,
-                                        lveRenderer.getSwapchainRenderPass()};
+  SimpleRenderSystem simpleRenderSystem{lveDevice, lveRenderer.getSwapchainRenderPass()};
 
   LveCamera camera{};
 
@@ -53,18 +51,13 @@ void FirstApp::run() {
 
     auto newTime = std::chrono::high_resolution_clock::now();
     float frameTime =
-        std::chrono::duration<float, std::chrono::seconds::period>(newTime -
-                                                                   currentTime)
-            .count();
+        std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
 
     currentTime = newTime;
 
-    cameraController.handleMouseMovement(lveWindow.getGLFWwindow(), frameTime,
-                                         viewerObject);
-    camera.setViewYXZ(viewerObject.transform.translation,
-                      viewerObject.transform.rotation);
-    cameraController.moveInPlaneXZ(lveWindow.getGLFWwindow(), frameTime,
-                                   viewerObject);
+    cameraController.handleMouseMovement(lveWindow.getGLFWwindow(), frameTime, viewerObject);
+    camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
+    cameraController.moveInPlaneXZ(lveWindow.getGLFWwindow(), frameTime, viewerObject);
 
     float aspect = lveRenderer.getAspectRatio();
 

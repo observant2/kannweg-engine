@@ -19,9 +19,7 @@ struct QueueFamilyIndices {
   bool graphicsFamilyHasValue = false;
   bool presentFamilyHasValue = false;
 
-  [[nodiscard]] bool isComplete() const {
-    return graphicsFamilyHasValue && presentFamilyHasValue;
-  }
+  [[nodiscard]] bool isComplete() const { return graphicsFamilyHasValue && presentFamilyHasValue; }
 };
 
 class LveDevice {
@@ -55,25 +53,18 @@ public:
 
   VkQueue presentQueue() { return presentQueue_; }
 
-  SwapchainSupportDetails getSwapchainSupport() {
-    return querySwapchainSupport(physicalDevice);
-  }
+  SwapchainSupportDetails getSwapchainSupport() { return querySwapchainSupport(physicalDevice); }
 
-  uint32_t findMemoryType(uint32_t typeFilter,
-                          VkMemoryPropertyFlags properties);
+  uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
-  QueueFamilyIndices findPhysicalQueueFamilies() {
-    return findQueueFamilies(physicalDevice);
-  }
+  QueueFamilyIndices findPhysicalQueueFamilies() { return findQueueFamilies(physicalDevice); }
 
-  VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates,
-                               VkImageTiling tiling,
+  VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling,
                                VkFormatFeatureFlags features);
 
   // Buffer Helper Functions
-  void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage,
-                    VkMemoryPropertyFlags properties, VkBuffer& buffer,
-                    VkDeviceMemory& bufferMemory);
+  void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
+                    VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 
   VkCommandBuffer beginSingleTimeCommands();
 
@@ -81,12 +72,11 @@ public:
 
   void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 
-  void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width,
-                         uint32_t height, uint32_t layerCount);
+  void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height,
+                         uint32_t layerCount);
 
-  void createImageWithInfo(const VkImageCreateInfo& imageInfo,
-                           VkMemoryPropertyFlags properties, VkImage& image,
-                           VkDeviceMemory& imageMemory);
+  void createImageWithInfo(const VkImageCreateInfo& imageInfo, VkMemoryPropertyFlags properties,
+                           VkImage& image, VkDeviceMemory& imageMemory);
 
   VkPhysicalDeviceProperties properties;
 
@@ -112,8 +102,7 @@ private:
 
   QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 
-  void populateDebugMessengerCreateInfo(
-      VkDebugUtilsMessengerCreateInfoEXT& createInfo);
+  void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
 
   void hasGflwRequiredInstanceExtensions();
 
@@ -132,10 +121,8 @@ private:
   VkQueue graphicsQueue_;
   VkQueue presentQueue_;
 
-  const std::vector<const char*> validationLayers = {
-      "VK_LAYER_KHRONOS_validation"};
-  const std::vector<const char*> deviceExtensions = {
-      VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+  const std::vector<const char*> validationLayers = {"VK_LAYER_KHRONOS_validation"};
+  const std::vector<const char*> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 };
 
 } // namespace lve

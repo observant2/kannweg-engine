@@ -8,11 +8,10 @@
 namespace lve {
 class LveCamera {
 public:
-  void setOrthographicProjection(float left, float right, float top,
-                                 float bottom, float near, float far);
+  void setOrthographicProjection(float left, float right, float top, float bottom, float near,
+                                 float far);
 
-  void setPerspectiveProjection(float fovy, float aspect, float near,
-                                float far);
+  void setPerspectiveProjection(float fovy, float aspect, float near, float far);
 
   void setViewDirection(glm::vec3 position, glm::vec3 direction,
                         glm::vec3 up = glm::vec3{0.f, -1.f, 0.f});
@@ -22,9 +21,7 @@ public:
 
   void setViewYXZ(glm::vec3 position, glm::vec3 rotation);
 
-  [[nodiscard]] const glm::mat4& getProjection() const {
-    return projectionMatrix;
-  }
+  [[nodiscard]] const glm::mat4& getProjection() const { return projectionMatrix; }
   [[nodiscard]] const glm::mat4& getView() const { return viewMatrix; }
 
 private:

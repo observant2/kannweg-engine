@@ -6,9 +6,8 @@ namespace lve {
 
 class LveBuffer {
 public:
-  LveBuffer(LveDevice& device, VkDeviceSize instanceSize,
-            uint32_t instanceCount, VkBufferUsageFlags usageFlags,
-            VkMemoryPropertyFlags memoryPropertyFlags,
+  LveBuffer(LveDevice& device, VkDeviceSize instanceSize, uint32_t instanceCount,
+            VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags,
             VkDeviceSize minOffsetAlignment = 1);
   ~LveBuffer();
 
@@ -18,13 +17,10 @@ public:
   VkResult map(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
   void unmap();
 
-  void writeToBuffer(void* data, VkDeviceSize size = VK_WHOLE_SIZE,
-                     VkDeviceSize offset = 0);
+  void writeToBuffer(void* data, VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
   VkResult flush(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
-  VkDescriptorBufferInfo descriptorInfo(VkDeviceSize size = VK_WHOLE_SIZE,
-                                        VkDeviceSize offset = 0);
-  VkResult invalidate(VkDeviceSize size = VK_WHOLE_SIZE,
-                      VkDeviceSize offset = 0);
+  VkDescriptorBufferInfo descriptorInfo(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
+  VkResult invalidate(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
 
   void writeToIndex(void* data, int index);
   VkResult flushIndex(int index);
@@ -37,14 +33,11 @@ public:
   [[nodiscard]] VkDeviceSize getInstanceSize() const { return instanceSize; }
   [[nodiscard]] VkDeviceSize getAlignmentSize() const { return instanceSize; }
   [[nodiscard]] VkBufferUsageFlags getUsageFlags() const { return usageFlags; }
-  [[nodiscard]] VkMemoryPropertyFlags getMemoryPropertyFlags() const {
-    return memoryPropertyFlags;
-  }
+  [[nodiscard]] VkMemoryPropertyFlags getMemoryPropertyFlags() const { return memoryPropertyFlags; }
   [[nodiscard]] VkDeviceSize getBufferSize() const { return bufferSize; }
 
 private:
-  static VkDeviceSize getAlignment(VkDeviceSize instanceSize,
-                                   VkDeviceSize minOffsetAlignment);
+  static VkDeviceSize getAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment);
 
   LveDevice& lveDevice;
   void* mapped = nullptr;
