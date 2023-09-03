@@ -34,8 +34,7 @@ void MovementController::moveInPlaneXZ(GLFWwindow* window, float dt,
   }
 
   if (glm::dot(moveDir, moveDir) > std::numeric_limits<float>::epsilon()) {
-    gameObject.transform.translation +=
-        moveSpeed * dt * glm::normalize(moveDir);
+    gameObject.transform.translation += moveSpeed * dt * glm::normalize(moveDir);
   }
 }
 void MovementController::handleMouseMovement(GLFWwindow* window, float dt,
@@ -52,10 +51,8 @@ void MovementController::handleMouseMovement(GLFWwindow* window, float dt,
   lastX = static_cast<float>(x);
   lastY = static_cast<float>(y);
 
-  gameObject.transform.rotation.y +=
-      glm::mod(dt * xDiff * lookSpeed, glm::two_pi<float>());
-  gameObject.transform.rotation.x -=
-      glm::clamp(dt * yDiff * lookSpeed, -1.5f, 1.5f);
+  gameObject.transform.rotation.y += glm::mod(dt * xDiff * lookSpeed, glm::two_pi<float>());
+  gameObject.transform.rotation.x -= glm::clamp(dt * yDiff * lookSpeed, -1.5f, 1.5f);
 
   int width, height;
   glfwGetWindowSize(window, &width, &height);

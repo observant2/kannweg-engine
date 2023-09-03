@@ -4,7 +4,6 @@ layout (location = 0) out vec4 outColor;
 layout (location = 0) in vec3 fragColor;
 
 layout(push_constant) uniform Push {
-    mat4 transform;// project * view * model
     mat4 modelMatrix;
 } push;
 

@@ -20,22 +20,18 @@ public:
     return lveSwapchain->getRenderPass();
   }
 
-  [[nodiscard]] float getAspectRatio() const {
-    return lveSwapchain->extentAspectRatio();
-  }
+  [[nodiscard]] float getAspectRatio() const { return lveSwapchain->extentAspectRatio(); }
 
   [[nodiscard]] bool isFrameInProgress() const { return isFrameStarted; };
 
   [[nodiscard]] VkCommandBuffer getCurrentCommandBuffer() const {
     // TODO: do I really want a runtime assert here? :-/
-    assert(isFrameStarted &&
-           "Cannot get command buffer when frame not in progress");
+    assert(isFrameStarted && "Cannot get command buffer when frame not in progress");
     return commandBuffers[currentFrameIndex];
   }
 
   [[nodiscard]] int getFrameIndex() const {
-    assert(isFrameStarted &&
-           "Cannot get frame index when frame not in progress");
+    assert(isFrameStarted && "Cannot get frame index when frame not in progress");
     return currentFrameIndex;
   }
 
