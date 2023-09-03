@@ -18,8 +18,10 @@
 
 namespace lve {
 struct GlobalUbo {
-  alignas(16) glm::mat4 projectionView{1.f};
-  alignas(16) glm::vec3 lightDirection = glm::normalize(glm::vec3(1.f, -3.f, -1.f));
+  glm::mat4 projectionView{1.f};
+  glm::vec4 ambientLightColor{1.f, 1.f, 1.f, 0.02f}; // w is intensity
+  glm::vec3 lightPosition{-1.f};
+  alignas(16) glm::vec4 lightColor{1.f}; // w is light intensity
 };
 
 FirstApp::FirstApp() {
@@ -63,6 +65,7 @@ void FirstApp::run() {
   LveCamera camera{};
 
   auto viewerObject = LveGameObject::createGameObject();
+  viewerObject.transform.translation.z = -1.0f;
   MovementController cameraController{lveWindow.getGLFWwindow()};
 
   auto currentTime = std::chrono::high_resolution_clock::now();
@@ -111,15 +114,24 @@ void FirstApp::run() {
 void FirstApp::loadGameObjects() {
   std::shared_ptr<LveModel> lveModel =
       LveModel::createModelFromFile(lveDevice, "./assets/smooth_vase.obj");
+
+  std::shared_ptr<LveModel> floor = LveModel::createModelFromFile(lveDevice, "./assets/quad.obj");
+
+  auto floorObj = LveGameObject::createGameObject();
+  floorObj.model = floor;
+  floorObj.transform.translation = {.5, .0f, 0.0f};
+  floorObj.transform.scale = {1.5f, 1.5f, 1.5f};
+  gameObjects.push_back(std::move(floorObj));
+
   auto cube = LveGameObject::createGameObject();
   cube.model = lveModel;
-  cube.transform.translation = {.0, .0f, 2.0f};
+  cube.transform.translation = {.0, .0f, 0.0f};
   cube.transform.scale = {1.5f, 1.5f, 1.5f};
   gameObjects.push_back(std::move(cube));
 
   auto cube2 = LveGameObject::createGameObject();
   cube2.model = lveModel;
-  cube2.transform.translation = {1.0, .0f, 2.0f};
+  cube2.transform.translation = {1.0, .0f, 0.0f};
   cube2.transform.scale = {1.5f, 1.5f, 1.5f};
   gameObjects.push_back(std::move(cube2));
 }
