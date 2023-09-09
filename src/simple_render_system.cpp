@@ -1,6 +1,5 @@
 #include "simple_render_system.h"
 #include "glm/gtc/constants.hpp"
-#include "lve_camera.h"
 #include <array>
 #include <stdexcept>
 
@@ -56,14 +55,13 @@ void SimpleRenderSystem::createPipeline(VkRenderPass renderPass) {
                                               "./shaders/simple_shader.frag.spv", pipelineConfig);
 }
 
-void SimpleRenderSystem::renderGameObjects(FrameInfo& frameInfo,
-                                           std::vector<LveGameObject>& gameObjects) {
+void SimpleRenderSystem::renderGameObjects(FrameInfo& frameInfo) {
   lvePipeline->bind(frameInfo.commandBuffer);
 
   vkCmdBindDescriptorSets(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout,
                           0, 1, &frameInfo.globalDescriptorSet, 0, nullptr);
 
-  for (auto& obj : gameObjects) {
+  for (auto& [id, obj] : frameInfo.gameObjects) {
     SimplePushConstantData push{};
     push.modelMatrix = obj.transform.mat4();
 

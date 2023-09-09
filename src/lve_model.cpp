@@ -17,7 +17,6 @@ void LveModel::createVertexBuffers(const std::vector<Vertex>& vertices) {
   vertexCount = static_cast<uint32_t>(vertices.size());
   assert(vertexCount >= 3 && "Vertex count must be at least 3");
 
-  VkDeviceSize bufferSize = sizeof(vertices[0]) * vertexCount;
   uint32_t vertexSize = sizeof(vertices[0]);
 
   LveBuffer stagingBuffer{lveDevice, vertexSize, vertexCount, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
@@ -35,7 +34,7 @@ void LveModel::createVertexBuffers(const std::vector<Vertex>& vertices) {
 
   lveDevice.copyBuffer(stagingBuffer.getBuffer(), vertexBuffer->getBuffer(),
                        // kann weg?
-                       bufferSize);
+                       stagingBuffer.getBufferSize());
 }
 
 void LveModel::createIndexBuffer(const std::vector<uint32_t>& indices) {
@@ -46,7 +45,6 @@ void LveModel::createIndexBuffer(const std::vector<uint32_t>& indices) {
     return;
   }
 
-  VkDeviceSize bufferSize = sizeof(indices[0]) * indexCount;
   uint32_t indexSize = sizeof(indices[0]);
 
   LveBuffer stagingBuffer{lveDevice, indexSize, indexCount, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
@@ -64,7 +62,7 @@ void LveModel::createIndexBuffer(const std::vector<uint32_t>& indices) {
 
   lveDevice.copyBuffer(stagingBuffer.getBuffer(), indexBuffer->getBuffer(),
                        // kann weg?
-                       bufferSize);
+                       stagingBuffer.getBufferSize());
 }
 
 void LveModel::bind(VkCommandBuffer commandBuffer) {
@@ -133,7 +131,7 @@ void LveModel::Builder::loadModel(const std::string& filepath) {
   for (int i = 0; i < mesh->mNumVertices; i++) {
     const auto vertex = mesh->mVertices[i];
     vertices[i].position = {vertex.x, vertex.y, vertex.z};
-    vertices[i].color = {0.3f, 0.0f, 0.2f};
+    vertices[i].color = {1.f, 1.f, 0.8f};
 
     const auto normal = mesh->mNormals[i];
     vertices[i].normal = {normal.x, normal.y, normal.z};

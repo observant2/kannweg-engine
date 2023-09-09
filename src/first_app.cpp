@@ -13,7 +13,7 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 
-#include "lve_buffer.h"
+#include "rendering/lve_buffer.h"
 #include <glm/glm.hpp>
 
 namespace lve {
@@ -46,10 +46,10 @@ void FirstApp::run() {
     uboBuffer->map();
   }
 
-  auto globalSetLayout =
-      LveDescriptorSetLayout::Builder(lveDevice)
-          .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
-          .build();
+  auto globalSetLayout = LveDescriptorSetLayout::Builder(lveDevice)
+                             .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                                         VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
+                             .build();
 
   std::vector<VkDescriptorSet> globalDescriptorSets(LveSwapchain::MAX_FRAMES_IN_FLIGHT);
   for (int i = 0; i < globalDescriptorSets.size(); i++) {
@@ -89,8 +89,9 @@ void FirstApp::run() {
 
     if (auto commandBuffer = lveRenderer.beginFrame()) {
       int frameIndex = lveRenderer.getFrameIndex();
-      FrameInfo frameInfo{frameIndex, frameTime, commandBuffer, camera,
-                          globalDescriptorSets[frameIndex]};
+      FrameInfo frameInfo{
+          frameIndex, frameTime, commandBuffer, camera, globalDescriptorSets[frameIndex],
+          gameObjects};
       // update
       GlobalUbo ubo{};
       ubo.projectionView = camera.getProjection() * camera.getView();
@@ -100,7 +101,7 @@ void FirstApp::run() {
       // render
       lveRenderer.beginSwapchainRenderPass(commandBuffer);
 
-      simpleRenderSystem.renderGameObjects(frameInfo, gameObjects);
+      simpleRenderSystem.renderGameObjects(frameInfo);
 
       lveRenderer.endSwapchainRenderPass(commandBuffer);
 
@@ -121,18 +122,18 @@ void FirstApp::loadGameObjects() {
   floorObj.model = floor;
   floorObj.transform.translation = {.5, .0f, 0.0f};
   floorObj.transform.scale = {1.5f, 1.5f, 1.5f};
-  gameObjects.push_back(std::move(floorObj));
+  gameObjects.emplace(floorObj.getId(), std::move(floorObj));
 
   auto cube = LveGameObject::createGameObject();
   cube.model = lveModel;
   cube.transform.translation = {.0, .0f, 0.0f};
   cube.transform.scale = {1.5f, 1.5f, 1.5f};
-  gameObjects.push_back(std::move(cube));
+  gameObjects.emplace(cube.getId(), std::move(cube));
 
   auto cube2 = LveGameObject::createGameObject();
   cube2.model = lveModel;
   cube2.transform.translation = {1.0, .0f, 0.0f};
   cube2.transform.scale = {1.5f, 1.5f, 1.5f};
-  gameObjects.push_back(std::move(cube2));
+  gameObjects.emplace(cube2.getId(), std::move(cube2));
 }
 } // namespace lve

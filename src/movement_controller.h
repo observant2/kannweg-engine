@@ -2,7 +2,7 @@
 #pragma once
 
 #include "lve_game_object.h"
-#include "lve_window.h"
+#include "rendering/lve_window.h"
 
 namespace lve {
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "lve_model.h"
 #include "lve_swapchain.h"
 #include "lve_window.h"
+#include <cassert>
 #include <memory>
 
 namespace lve {
@@ -25,7 +25,6 @@ public:
   [[nodiscard]] bool isFrameInProgress() const { return isFrameStarted; };
 
   [[nodiscard]] VkCommandBuffer getCurrentCommandBuffer() const {
-    // TODO: do I really want a runtime assert here? :-/
     assert(isFrameStarted && "Cannot get command buffer when frame not in progress");
     return commandBuffers[currentFrameIndex];
   }

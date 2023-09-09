@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include "lve_buffer.h"
-#include "lve_device.h"
+#include "rendering/lve_buffer.h"
+#include "rendering/lve_device.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
