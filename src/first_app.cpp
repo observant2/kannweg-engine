@@ -2,7 +2,8 @@
 #include "fmt/core.h"
 #include "lve_camera.h"
 #include "movement_controller.h"
-#include "simple_render_system.h"
+#include "rendering/systems/point_light_system.h"
+#include "rendering/systems/simple_render_system.h"
 #include <array>
 #include <chrono>
 
@@ -18,7 +19,8 @@
 
 namespace lve {
 struct GlobalUbo {
-  glm::mat4 projectionView{1.f};
+  glm::mat4 projection{1.f};
+  glm::mat4 view{1.f};
   glm::vec4 ambientLightColor{1.f, 1.f, 1.f, 0.02f}; // w is intensity
   glm::vec3 lightPosition{-1.f};
   alignas(16) glm::vec4 lightColor{1.f}; // w is light intensity
@@ -62,6 +64,8 @@ void FirstApp::run() {
   SimpleRenderSystem simpleRenderSystem{lveDevice, lveRenderer.getSwapchainRenderPass(),
                                         globalSetLayout->getDescriptorSetLayout()};
 
+  PointLightSystem pointLightSystem{lveDevice, lveRenderer.getSwapchainRenderPass(),
+                                    globalSetLayout->getDescriptorSetLayout()};
   LveCamera camera{};
 
   auto viewerObject = LveGameObject::createGameObject();
@@ -94,7 +98,8 @@ void FirstApp::run() {
           gameObjects};
       // update
       GlobalUbo ubo{};
-      ubo.projectionView = camera.getProjection() * camera.getView();
+      ubo.projection = camera.getProjection();
+      ubo.view = camera.getView();
       uboBuffers[frameIndex]->writeToBuffer(&ubo);
       uboBuffers[frameIndex]->flush();
 
@@ -102,6 +107,7 @@ void FirstApp::run() {
       lveRenderer.beginSwapchainRenderPass(commandBuffer);
 
       simpleRenderSystem.renderGameObjects(frameInfo);
+      pointLightSystem.render(frameInfo);
 
       lveRenderer.endSwapchainRenderPass(commandBuffer);
 

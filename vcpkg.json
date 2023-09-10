@@ -1,16 +1,21 @@
 {
-  "builtin-baseline" : "0fa8459cf3a7caca7adc58f992bc32ff13630684",
-  "dependencies" : [ {
-    "name" : "glfw3",
-    "version>=" : "3.3.8#2"
-  }, {
-    "name" : "glm",
-    "version>=" : "0.9.9.8#2"
-  }, {
-    "name" : "fmt",
-    "version>=" : "10.0.0"
-  }, {
-    "name" : "assimp",
-    "version>=" : "5.2.5"
-  } ]
+  "dependencies": [
+    {
+      "name": "glfw3",
+      "version>=": "3.3.8#2"
+    },
+    {
+      "name": "glm",
+      "version>=": "2023-06-08"
+    },
+    {
+      "name": "fmt",
+      "version>=": "10.0.0"
+    },
+    {
+      "name": "assimp",
+      "version>=": "5.2.5"
+    }
+  ],
+  "builtin-baseline": "424ed5e6737117a53b947c5a8c09bc2860cd5469"
 }

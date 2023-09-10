@@ -69,8 +69,8 @@ void LvePipeline::createGraphicsPipeline(const std::string& vertFilepath,
   shaderStages[1].pNext = nullptr;
   shaderStages[1].pSpecializationInfo = nullptr;
 
-  auto attributeDescriptions = LveModel::Vertex::getAttributeDescription();
-  auto bindingDescriptions = LveModel::Vertex::getBindingDescription();
+  auto& attributeDescriptions = configInfo.attributeDescriptions;
+  auto& bindingDescriptions = configInfo.bindingDescriptions;
 
   VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
   vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -187,6 +187,9 @@ void LvePipeline::defaultPipelineConfigInfo(PipelineConfigInfo& configInfo) {
   configInfo.dynamicStateInfo.pDynamicStates = configInfo.dynamicStateEnables.data();
   configInfo.dynamicStateInfo.dynamicStateCount =
       static_cast<uint32_t>(configInfo.dynamicStateEnables.size());
+
+  configInfo.bindingDescriptions = LveModel::Vertex::getBindingDescription();
+  configInfo.attributeDescriptions = LveModel::Vertex::getAttributeDescription();
 }
 
 void LvePipeline::bind(VkCommandBuffer commandBuffer) {

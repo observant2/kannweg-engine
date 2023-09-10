@@ -8,10 +8,12 @@ find_package(Vulkan REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
 
-file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/src/*)
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw Vulkan::Vulkan assimp::assimp fmt::fmt)
+
+# ---------------------------------------------
 
 # assets
 add_custom_command(
