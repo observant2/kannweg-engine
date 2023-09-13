@@ -30,4 +30,13 @@ glm::mat4 TransformComponent::mat4() {
                    },
                    {translation.x, translation.y, translation.z, 1.0f}};
 }
+LveGameObject LveGameObject::makePointLight(float intensity, float radius, glm::vec3 color) {
+  LveGameObject gameObj = LveGameObject::createGameObject();
+  gameObj.color = color;
+  gameObj.transform.scale.x = radius;
+  gameObj.pointLightComponent = std::make_unique<PointLightComponent>();
+  gameObj.pointLightComponent->lightIntensity = intensity;
+
+  return gameObj;
+}
 } // namespace lve

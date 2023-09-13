@@ -62,6 +62,10 @@ void SimpleRenderSystem::renderGameObjects(FrameInfo& frameInfo) {
                           0, 1, &frameInfo.globalDescriptorSet, 0, nullptr);
 
   for (auto& [id, obj] : frameInfo.gameObjects) {
+    if (obj.model == nullptr) {
+      continue;
+    }
+
     SimplePushConstantData push{};
     push.modelMatrix = obj.transform.mat4();
 
